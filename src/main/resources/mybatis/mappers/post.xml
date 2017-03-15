@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="post">
+	<insert id="insert" parameterType="postvo">
+		<selectKey keyProperty="no" resultType="long" order="BEFORE">
+			select seq_post.nextVal from dual
+		</selectKey>
+	
+		<![CDATA[
+			insert  
+			  into post (no, title, content, reg_date, category_no)
+			values (#{no }, #{title }, #{content }, sysdate, #{categoryNo })
+		]]>
+	</insert>
+	
+	<select id="select" resultType="postvo" parameterType="long">
+		<![CDATA[
+			select no, title, content, reg_date, category_no
+			  from post
+			 where no = #{no }
+		]]>
+	</select> 
+
+	<select id="getList" resultType="postvo" parameterType="string">
+		<![CDATA[
+			select a.no,
+			       a.title,
+			       a.content, 
+			       to_char(a.reg_date,'yyyy/mm/dd') as regDate,
+			       category_no as categoryNo
+			  from post a, category b
+			 where a.CATEGORY_NO = b.NO
+			   and b.BLOG_ID = #{userId }
+		]]>
+		<if test="categoryNo != null and categoryNo != ''">
+			<![CDATA[
+				and b.no = #{categoryNo }
+			]]>	
+		</if>
+	</select> 
+	
+	<select id="getMaxPostNoByID" resultType="long" parameterType="map">
+		<![CDATA[
+			select max(a.no) as maxNo
+			  from post a, category b
+			 where a.CATEGORY_NO = b.NO
+			   and b.BLOG_ID = #{userId }
+		]]>
+		<if test="categoryNo != null and categoryNo != ''">
+			<![CDATA[
+				and b.no = #{categoryNo }
+			]]>	
+		</if>
+	</select>
+	
+</mapper>
